@@ -1,0 +1,19 @@
+version: '2'
+services:
+    web:
+      image: golang:1.7
+      ports:
+        - "8080:8080"
+      volumes:
+        - .:/go/src/github.com/lohanbodevan/gomonred
+      working_dir: /go/src/github.com/lohanbodevan/gomonred
+      command: make run
+      links:
+        - cache
+        - db:mongo_db
+    cache:
+      image: redis
+    db:
+      image: mongo
+        
+
