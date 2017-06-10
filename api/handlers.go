@@ -11,9 +11,15 @@ func (a *Api) GetCarsHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
-	response, err := json.Marshal(cars)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+	var response []byte
+
+	if len(cars) > 0 {
+		response, err = json.Marshal(cars)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+	} else {
+		w.WriteHeader(http.StatusNotFound)
 	}
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
