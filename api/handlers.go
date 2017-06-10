@@ -6,14 +6,14 @@ import (
 )
 
 func (a *Api) GetCarsHandler(w http.ResponseWriter, r *http.Request) {
-	cars, err := GetCars(a.Repository)
+	cars, err := GetCars(a.Repository, a.Cache)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
 	response, err := json.Marshal(cars)
 	if err != nil {
-		w.WriteHeader(http.StatusServiceUnavailable)
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
@@ -29,7 +29,7 @@ func (a *Api) CreateCarsHandler(w http.ResponseWriter, r *http.Request) {
 
 	err = CreateCars(payload, a.Repository)
 	if err != nil {
-		w.WriteHeader(http.StatusServiceUnavailable)
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 
 	w.WriteHeader(http.StatusCreated)

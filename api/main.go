@@ -3,6 +3,7 @@ package api
 import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/codegangsta/negroni"
+	"github.com/go-redis/redis"
 	"github.com/gorilla/mux"
 	"gopkg.in/mgo.v2"
 )
@@ -11,8 +12,14 @@ type Repository struct {
 	Session *mgo.Session
 }
 
+type Cache struct {
+	Client      *redis.Client
+	KeyNotFound interface{}
+}
+
 type Api struct {
 	Repository *Repository
+	Cache      *Cache
 }
 
 func (app *Api) ConfigureRoutes(router *mux.Router) {
@@ -24,7 +31,13 @@ func InitServer() {
 	repository := DatabseInit()
 	defer repository.Session.Close()
 
-	app := Api{Repository: &repository}
+	cache := CacheInit()
+	defer cache.Client.Close()
+
+	app := Api{
+		Repository: &repository,
+		Cache:      &cache,
+	}
 
 	mux := mux.NewRouter()
 	app.ConfigureRoutes(mux)
@@ -46,4 +59,18 @@ func DatabseInit() Repository {
 		Session: session,
 	}
 	return repo
+}
+
+func CacheInit() Cache {
+	client := redis.NewClient(&redis.Options{
+		Addr:     "cache:6379",
+		Password: "",
+		DB:       0,
+	})
+
+	cache := Cache{
+		Client:      client,
+		KeyNotFound: redis.Nil,
+	}
+	return cache
 }
