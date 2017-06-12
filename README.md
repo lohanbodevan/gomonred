@@ -1,7 +1,7 @@
 # GOMONRED
 Bootstrap project to run HTTP REST API on GO lang with MongoDB and Redis
 
-## API Enpoints
+## API Endpoints
 GET /cars
 ```
 [
