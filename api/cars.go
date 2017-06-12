@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	log "github.com/Sirupsen/logrus"
+	"os"
 	"time"
 )
 
@@ -61,7 +62,14 @@ func createCarsCache(c *Cache, cars []Car) error {
 		log.Errorf("API - createCarsCache - Fail marshal json. Error: %s JSON: %s", err, json_cars)
 		return err
 	}
-	err = c.Client.Set("cars_list", json_cars, time.Minute*2).Err()
+
+	cacheTTL, err := time.ParseDuration(os.Getenv("CACHE_DEFAULT_TTL"))
+	if err != nil {
+		log.Errorf("API - createCarsCache - String to duration conversion fail: %s", err)
+		cacheTTL = time.Minute * 2
+	}
+
+	err = c.Client.Set("cars_list", json_cars, cacheTTL).Err()
 	if err != nil {
 		log.Errorf("API - createCarsCache - Fail to set cache: %s", err)
 		return err
@@ -71,7 +79,7 @@ func createCarsCache(c *Cache, cars []Car) error {
 }
 
 func getCarsFromDB(r *Repository) ([]Car, error) {
-	collection := r.Session.DB("gomonred").C("cars")
+	collection := r.Session.DB(os.Getenv("DB_NAME")).C("cars")
 
 	cars := []Car{}
 	err := collection.Find(nil).Iter().All(&cars)
@@ -85,7 +93,7 @@ func getCarsFromDB(r *Repository) ([]Car, error) {
 }
 
 func CreateCars(car Car, r *Repository) error {
-	collection := r.Session.DB("gomonred").C("cars")
+	collection := r.Session.DB(os.Getenv("DB_NAME")).C("cars")
 
 	err := collection.Insert(&car)
 	if err != nil {

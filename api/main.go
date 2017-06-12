@@ -6,6 +6,7 @@ import (
 	"github.com/go-redis/redis"
 	"github.com/gorilla/mux"
 	"gopkg.in/mgo.v2"
+	"os"
 )
 
 type Repository struct {
@@ -45,11 +46,12 @@ func InitServer() {
 	server := negroni.New(negroni.NewRecovery())
 	server.UseHandler(mux)
 
-	server.Run(":8080")
+	serverAddr := ":" + os.Getenv("PORT")
+	server.Run(serverAddr)
 }
 
 func DatabseInit() Repository {
-	session, err := mgo.Dial("mongo_db")
+	session, err := mgo.Dial(os.Getenv("DB_HOST"))
 	if err != nil {
 		log.Fatal(err)
 		panic(err)
@@ -62,8 +64,9 @@ func DatabseInit() Repository {
 }
 
 func CacheInit() Cache {
+	serverAddr := os.Getenv("CACHE_HOST") + ":" + os.Getenv("CACHE_PORT")
 	client := redis.NewClient(&redis.Options{
-		Addr:     "cache:6379",
+		Addr:     serverAddr,
 		Password: "",
 		DB:       0,
 	})

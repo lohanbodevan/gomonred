@@ -4,6 +4,13 @@ services:
       image: golang:1.7
       ports:
         - "8080:8080"
+      environment:
+        - PORT=8080
+        - DB_HOST=mongo_db
+        - DB_NAME=gomonred
+        - CACHE_HOST=cache
+        - CACHE_PORT=6379
+        - CACHE_DEFAULT_TTL=2m
       volumes:
         - .:/go/src/github.com/lohanbodevan/gomonred
       working_dir: /go/src/github.com/lohanbodevan/gomonred
